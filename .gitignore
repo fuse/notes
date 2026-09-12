@@ -1,0 +1,9 @@
+# Brouillons
+drafts/
+
+# macOS
+.DS_Store
+
+# Cursor (config locale)
+.cursor/
+.cursorrules

@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+ROOT="$(git rev-parse --show-toplevel)"
+cd "$ROOT"
+
+if ! command -v gpg >/dev/null 2>&1; then
+  echo "pre-commit: gpg introuvable dans le PATH" >&2
+  exit 1
+fi
+
+while IFS= read -r md; do
+  [[ -z "$md" ]] && continue
+  # Posts publiés à la racine uniquement (pas drafts/ ni sous-dossiers)
+  case "$md" in
+    */*) continue ;;
+  esac
+
+  asc="${md%.md}.asc"
+  echo "pre-commit: signature de ${md} -> ${asc}"
+  gpg --yes --detach-sign --armor --output "$asc" "$md"
+  git add -- "$asc"
+done < <(git diff --cached --name-only --diff-filter=ACM -- '*.md')
+
+exit 0
